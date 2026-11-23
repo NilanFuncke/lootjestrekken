@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1433">
+  <title>TEST · Lootjestrekken 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #070d24; touch-action: none; -webkit-user-select: none; user-select: none; }
+    #unity-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; background: #070d24; outline: none; }
+
+    #loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4vh;
+      background: radial-gradient(ellipse at 50% 120%, #2a3a7a 0%, #121c48 45%, #070d24 100%); color: #fff; font-family: 'Lilita One', Arial, sans-serif;
+      transition: opacity .8s ease; z-index: 10; overflow: hidden; }
+    #loader.hidden { opacity: 0; pointer-events: none; }
+
+    .title { text-align: center; line-height: .95; text-shadow: 0 4px 0 #1c0a1c, 0 0 18px rgba(255, 210, 63, .35); -webkit-text-stroke: 2px #1c0a1c; paint-order: stroke fill; }
+    .title .big { font-size: clamp(42px, 11vw, 96px); letter-spacing: 1px; }
+    .title .sub { font-size: clamp(26px, 6.5vw, 58px); color: #ffd23f; }
+
+    .gift { width: clamp(90px, 22vw, 150px); animation: wobble 1.4s ease-in-out infinite; filter: drop-shadow(0 8px 10px rgba(0,0,0,.45)); }
+    @keyframes wobble { 0%,100% { transform: rotate(-6deg) scale(1); } 25% { transform: rotate(6deg) scale(1.06, .94); } 50% { transform: rotate(-3deg) scale(.97, 1.04); } 75% { transform: rotate(4deg) scale(1.04, .96); } }
+
+    .bar { position: relative; width: min(78vw, 480px); aspect-ratio: 320 / 44; background: url('../TemplateData/bar_frame.png') center / 100% 100% no-repeat; }
+    .bar .fill { position: absolute; left: 3.4%; top: 25%; height: 50%; width: 0%; background: url('../TemplateData/bar_fill_health.png') left center / auto 100% no-repeat;
+      border-radius: 999px; transition: width .25s ease-out; }
+    .pct { font-size: clamp(18px, 4.5vw, 26px); color: #cfe0ff; margin-top: -2vh; }
+    .hint { font-family: Arial, sans-serif; font-size: 14px; color: #8fa3d6; opacity: .8; text-align: center; padding: 0 20px; }
+
+    .flake { position: absolute; top: -10px; color: #fff; opacity: .85; pointer-events: none; animation: fall linear infinite; }
+    @keyframes fall { to { transform: translate3d(var(--drift), 110vh, 0) rotate(360deg); } }
+
+    #error { display: none; position: fixed; left: 50%; bottom: 6vh; transform: translateX(-50%); max-width: 88vw; background: #b3261e; color: #fff; border: 3px solid #1c0a1c;
+      border-radius: 16px; padding: 14px 20px; font-family: Arial, sans-serif; font-size: 16px; text-align: center; z-index: 20; box-shadow: 0 6px 0 #1c0a1c; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+  <div id="loader">
+    <div class="title"><div class="big">Lootjestrekken</div><div class="sub">Kerst 2026</div></div>
+    <img class="gift" src="../TemplateData/gift.png" alt="">
+    <div class="bar"><div class="fill" id="fill"></div></div>
+  </div>
+  <div id="error"></div>
+
+  <script>
+    // falling snow on the loading screen
+    (function () {
+      var l = document.getElementById('loader');
+      for (var i = 0; i < 45; i++) {
+        var f = document.createElement('div');
+        f.className = 'flake'; f.textContent = Math.random() < .3 ? '❄' : '•';
+        f.style.left = (Math.random() * 100) + 'vw';
+        f.style.fontSize = (8 + Math.random() * 16) + 'px';
+        f.style.animationDuration = (6 + Math.random() * 8) + 's';
+        f.style.animationDelay = (-Math.random() * 14) + 's';
+        f.style.setProperty('--drift', ((Math.random() - .5) * 120) + 'px');
+        l.appendChild(f);
+      }
+    })();
+
+    function unityShowBanner(msg, type) {
+      if (type !== 'error') { console.warn(msg); return; }
+      var e = document.getElementById('error');
+      e.textContent = 'Oeps, de Kerstpost loopt vast: ' + msg + ' Probeer de pagina te verversen.';
+      e.style.display = 'block';
+    }
+
+    var buildUrl = "../Build";
+    var loaderUrl = buildUrl + "/fc74eb6fff2124e3c490d4c726fbbf26.loader.js";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/fb66659321ccf4ca2cf98a598f84b216.data.unityweb",
+      frameworkUrl: buildUrl + "/c3297668282b1134a62537d42846dcc1.framework.js.unityweb",
+      codeUrl: buildUrl + "/242909605cc655b71626d3192a7a2cdf.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Familie",
+      productName: "Lootjestrekken 2026",
+      productVersion: "0.1.0",
+      showBanner: unityShowBanner,
+      // keep phones cool: never render above 2x
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+    };
+
+    var canvas = document.querySelector("#unity-canvas");
+    var fill = document.getElementById('fill');
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = function () {
+      // download = first 75% of the bar, warm-up inside the app = last 25%
+      var loader = document.getElementById('loader');
+      function setBar(p) { fill.style.width = (93.2 * Math.max(0, Math.min(1, p))) + '%'; }
+      function hideLoader() {
+        if (!loader) return;
+        setBar(1);
+        loader.classList.add('hidden');
+        var l = loader; loader = null;
+        setTimeout(function () { l.remove(); }, 1000);
+      }
+      window.lootjesProgress = function (p) { setBar(0.75 + 0.25 * p); };
+      window.lootjesReady = hideLoader;
+      createUnityInstance(canvas, config, function (progress) {
+        setBar(0.75 * progress);
+      }).then(function (unityInstance) {
+        setBar(0.75);
+        // safety net: never keep the loader up forever
+        setTimeout(hideLoader, 45000);
+      }).catch(function (message) {
+        unityShowBanner(String(message), 'error');
+      });
+    };
+    script.onerror = function () { unityShowBanner('de app kon niet geladen worden.', 'error'); };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
