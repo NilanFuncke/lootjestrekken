@@ -71,19 +71,20 @@
     }
 
     var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/fc74eb6fff2124e3c490d4c726fbbf26.loader.js";
+    var loaderUrl = buildUrl + "/96020e7604023a756715366ec2dcfbce.loader.js";
     var config = {
       arguments: [],
-      dataUrl: buildUrl + "/fb66659321ccf4ca2cf98a598f84b216.data.unityweb",
+      dataUrl: buildUrl + "/fc4654a613c30e3424e77c128df5fcb0.data.unityweb",
       frameworkUrl: buildUrl + "/c3297668282b1134a62537d42846dcc1.framework.js.unityweb",
-      codeUrl: buildUrl + "/242909605cc655b71626d3192a7a2cdf.wasm.unityweb",
+      codeUrl: buildUrl + "/09b811d5702a50ccc1dbc0310ffe41d5.wasm.unityweb",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "Familie",
       productName: "Lootjestrekken 2026",
       productVersion: "0.1.0",
       showBanner: unityShowBanner,
-      // keep phones cool: never render above 2x
-      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      // keep phones cool: 1.5x max on phones/tablets (iPhones report 3x), 2x on desktop
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1,
+        (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent))) ? 1.5 : 2),
     };
 
     var canvas = document.querySelector("#unity-canvas");
